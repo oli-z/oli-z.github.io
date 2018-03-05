@@ -1,0 +1,268 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time.</title>
+  <!-- GOOGLE ANALYTICS KRAM START -->
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script>
+
+          (function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
+
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+
+          })(window,document,"script","https://www.google-analytics.com/analytics.js","ga");
+
+          ga("create", "UA-60493892-10", "auto");
+
+          ga("set", "anonymizeIP", true);
+
+          ga("send", "pageview");
+
+      </script>
+  <!-- GOOGLE ANALYTICS KRAM ENDE -->
+
+  
+  <script>
+
+    var start_secs;
+    var end_secs;
+
+    function set_cookie(name,value,days) {
+      var expires = "";
+      if (days) {
+          var date = new Date();
+          date.setTime(date.getTime() + (days*24*60*60*1000));
+          expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+
+    function get_cookie(name) {
+      var nameEQ = name + "=";
+      var ca = document.cookie.split(';');
+      for(var i=0;i < ca.length;i++) {
+          var c = ca[i];
+          while (c.charAt(0)==' ') c = c.substring(1,c.length);
+          if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+      }
+      return null;
+    }
+
+    function erase_cookie(name) {   
+      document.cookie = name+'=; Max-Age=-99999999;';  
+    }
+
+    function set_time(){
+      document.querySelector("#blur").classList.toggle("blur");
+      var start = prompt("Enter the beginning of your work day (HH:MM): ");
+      var end = prompt("Enter the end of your work day (HH:MM): ");
+      document.querySelector("#blur").classList.toggle("blur");
+
+      var start_array = start.split(":");
+      var end_array = end.split(":");
+
+      start_secs = parseInt(start_array[0]) * 60 * 60 + parseInt(start_array[1]) * 60;
+      end_secs = parseInt(end_array[0]) * 60 * 60 + parseInt(end_array[1]) * 60;
+
+      set_cookie("start", start_secs);
+      set_cookie("end", end_secs);
+    }
+
+    function get_seconds_now(){
+      var now = new Date();
+      var seconds_now = now.getSeconds() + (60 * now.getMinutes()) + (60 * 60 * now.getHours());
+      return seconds_now;
+    }
+    
+    function reload(){
+      var percentage = (get_seconds_now() - start_secs) / (end_secs - start_secs) * 100;
+      var percentage2 = Math.round((parseInt(get_cookie("timespendonpage")) / (get_seconds_now() - start_secs)) * 100 ) / 100;
+      document.querySelector("#percentage").innerHTML = Math.round(percentage) + " %";
+        document.title = "Time. "+Math.round(percentage * 10)/10 + " %.";
+        // document.querySelector("#progress").value = percentage;
+        document.querySelector("#percentage2").innerHTML = "YOU'VE SPENT " + percentage2 + " % OF THAT TIME ON THIS PAGE.";
+        if(percentage>100){
+           //alert("You just finished your working day.");
+          console.log("test");
+        }
+    }
+
+    function add_time_on_page() {
+      if(get_cookie("timespendonpage")){
+        set_cookie("timespendonpage", parseInt(get_cookie("timespendonpage"))+1);
+      }else{
+        set_cookie("timespendonpage", 1);
+      }
+      
+    }
+    
+    window.onload = function () {
+
+      if(get_cookie("start") && get_cookie("end")){
+        start_secs = get_cookie("start");
+        end_secs = get_cookie("end");
+      }else{
+        set_time();
+      }
+      
+      reload();
+      setInterval(reload, 1000);
+      setInterval(add_time_on_page, 1000);
+    }
+
+  </script>
+
+  <style>
+    
+     @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900');
+    
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    #change_settings{
+      position: absolute;
+      right: 1vw;
+      top: 1vw;
+      border: none;
+      background-color: #333;
+      color: #fff;
+      padding: 1em;
+      font-size: 1em;
+      font-family: 'Roboto', sans-serif;
+      -webkit-box-shadow: 10px 10px 51px 0px rgba(0,0,0,0.15);
+      -moz-box-shadow: 10px 10px 51px 0px rgba(0,0,0,0.15);
+      box-shadow: 10px 10px 51px 0px rgba(0,0,0,0.15);
+      transition-duration: 0.5s;
+    }
+
+    #change_settings:hover{
+      -webkit-box-shadow: 10px 10px 51px 0px rgba(0,0,0,0.47);
+      -moz-box-shadow: 10px 10px 51px 0px rgba(0,0,0,0.47);
+       box-shadow: 10px 10px 51px 0px rgba(0,0,0,0.47);
+      transition-duration: 0.5s;
+    }
+    
+    #progress {
+      width: 100%;
+      height: 100%;
+    }
+    
+    #container{
+      background: linear-gradient(-45deg, #23A6D5, #23D5AB);
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #percentage {
+      color: #fff;
+      vertical-align: middle;
+      text-align:center;
+      font-size: 16vh;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 800;
+    }
+    
+    #footer-desktop, #footer-mobile {
+      position: absolute;
+      display: inline;
+      bottom: 0;
+      z-index: 2;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 1em;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .descriptiontext {
+      font-family: 'Roboto', sans-serif;
+      color: #fff;
+      font-size: 10vh;
+      text-align: center;
+      font-weight: 100;
+      margin: 0 1em;
+    }
+    
+    #percentage2 {
+      font-family: 'Roboto', sans-serif;
+      color: #fff;
+      text-align: center;
+      margin: 1em;
+      font-weight: 300;
+    }
+    
+    #footer-desktop a, #footer-mobile a {
+      color: #fff;
+    }
+    
+    .blur {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #000;
+      position: fixed;
+      opacity: 0.7;
+      transition-duration: 0.5s;
+    }
+    
+    #footer-mobile {
+      display: none;
+    }
+    
+    
+    
+    @media only screen and (max-width: 768px) {
+      #change_settings {
+        position: relative;
+        right: auto;
+        top: auto;
+        margin: 0 auto 1em auto;
+      }
+      
+      #footer-desktop {
+        display: none;
+      }
+      
+      #footer-mobile {
+        position: relative;
+        display: block;
+        margin-bottom: 0;
+      }
+      
+    .centerbox {
+      text-align: center;
+    }
+    }
+  </style>
+</head>
+<body>
+  <div id="blur"></div>
+  <div id="container">
+    <div class="centerbox">
+      <p class="descriptiontext">You've got</p>
+      <p id="percentage"></p>
+      <p class="descriptiontext"> of your work day done. </p>
+      <!-- <progress value="0" max="100" id="progress" width="100%" height="100%"></progress> -->
+      <p id="percentage2">You've spend --- % of that time on this page.</p>
+      <button id="change_settings" onclick="set_time();">CHANGE TIMES</button>
+      <div id="footer-mobile">
+        <a href="view-source:">Source</a>
+      </div>
+    </div>
+    <div id="footer-desktop">
+        <a href="view-source:">Source</a>
+    </div>
+  </div>
+</body>
+
+
+<!-- Ticking away the moments that make up a dull day. -->
+<!-- You fritter and waste the hours in an off hand way. -->
